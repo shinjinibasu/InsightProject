@@ -134,26 +134,42 @@ def titles_from_ids(df,bids=[1]):
     return titles
 
 
-# In[5]:
-
-
-def get_n_rec_user(user_id,model,testset):
-    
-    tst = []
-    for (uid,bid,rat) in testset:
-        if uid == user_id:
-            tst.append((uid,bid,rat))
-        continue
-        
-    pred = model.test(tst)
-    
-    topn = get_top_n(pred,n=5)
-    
-    return topn
-
-
 # In[ ]:
 
 
+def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
+    
+    """Return the top-N recommendation for an individual user given the model and a testset.
 
+    Args:
+        
+        user_id(int): user id
+        testset(list) = list of tuples containt (user_id, book_id, <placeholder rating to be predicted>)
+        n(int): The number of recommendation to output for each user. Default
+            is 5.
+
+    Returns: top_n (array): array of shape (n) with top n predictions for given user id.
+    """
+    n_books=9501
+    tst = testset.loc[testset['0']==user_id].to_records(index=False).tolist()    
+    pred = model.test(tst)
+    
+    # Creates a matrix with shape (n_books).
+    rat_pred = np.zeros(n_books)
+    
+    # Fills the matrix with the average rating for book weighted by a factor of 0.8 to ensure booksthat are personally matched with users gets returned first.
+    for bid in range(len(rat_pred)):
+        rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*0.8*div_m.iloc[int(bid)][1]
+
+    #Fills in actual prediction for given user id, book id combination where the estimate is non-zero.
+    for uid, bid, true_r, est, _ in pred:
+        if est > 0.6:
+            rat_pred[int(bid)] = est*div_m.iloc[int(bid)][1]
+
+    # Sorts the predictions for each user and retrieve the n highest ones.
+    top_n = rat_pred.argsort()[::-1][:n]
+    
+    rec_n = titles_from_ids(df,bids=list(top_n))
+    
+    return rec_n
 

@@ -1,6 +1,5 @@
 from flask import render_template, request, redirect
 from flaskexample import app
-from flaskexample.forms import LoginForm
 import os
 import numpy as np
 import pandas as pd
