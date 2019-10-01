@@ -26,14 +26,14 @@ def form_example():
       test = pd.read_csv(os.path.join(path,'testset.csv'))
       user_df = pd.read_csv(os.path.join(path,'goodreads2/user_w_uid_bavg_titles.csv'))
       div_m = pd.read_csv(os.path.join(path,'goodreads2/div_array.csv'))
-      u_id=500
+      u_id=1500
       if user_id == 'Shinjini':
          #full_string = '<br>'.join(["The Fifth Season","Americanah",
                                       #"Poisonwood Bible",
                                       #"Alanna: The First Adventure",
                                       #"Bayou Moon"])
          
-         u_id = 1500
+         u_id = 1200
          ### model output goes here      
       rec = get_n_rec_user(user_df,u_id,model,div_m,test)
       full_string = '<br>'.join(rec)
