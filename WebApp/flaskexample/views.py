@@ -26,14 +26,29 @@ def form_example():
       test = pd.read_csv(os.path.join(path,'testset.csv'))
       user_df = pd.read_csv(os.path.join(path,'goodreads2/user_w_uid_bavg_titles.csv'))
       div_m = pd.read_csv(os.path.join(path,'goodreads2/div_array.csv'))
-      u_id=1500
+      u_id=1200
+      u_id=1200
+      names = ['Brianne', 'John', 'Bennett','Brandon', 'Yaarit','Danila', 'Daliang',
+          'Steven', 'Randolph', 'Alex', 'Gary', 'Julia', 'Ilia', 'Chang', 'Daniel', 'Kai',
+          'Jason', 'Victoria', 'Antoine', 'Wenke', 'Avi', 'Jesse', 'Anna', 'Nina', 'Paul', 'Avery', 'Hugo', 'Charlie', 'Dewey', 'Jamel', 'Magdalena', 'Molly', 'Sherry', 'Curtis', 'Thad', 'Junior', 'Seymour', 'Betty', 'Otto', 'Elsie', 'May', 'Marcelino', 'Roger', 'Graciela', 'Ashley','Antony', 'Tameka', 'Andreas', 'Fermin',
+          'Garland', 'Sol', 'Joshua', 'Gavin', 'Whitney', 'Shelby', 'Coy', 'Wm', 'Myra', 'Dalton', 'Williams', 'Danial', 'Sophia', 'Krista', 'Samuel',
+          'Polly', 'Veronica', 'Winfred', 'Erwin', 'Tonya', 'Markus', 'Marisa', 'Houston', 'Numbers', 'Kris', 'Darcy', 'Kenny', 'Dwight', 'Ronda', 'Clarice', 'Wendell', 'Gerardo', 'Millard', 'Jeffry', 'Mitch', 'Haywood',
+          'Dylan', 'Terrence', 'Jeanne', 'Leopoldo', 'Clifton', 'Cornelius', 'Linwood', 'Rolando', 'Alyson',
+          'Darren', 'Maximo', 'Vance', 'Rocky', 'Robert', 'Darrin', 'Cole', 'Augusta', 'Gilberto', 'Eloy', 'Dino',
+          'Malcolm', 'Bessie', 'Roseann', 'Norman', 'Allyson', 'Abe', 'Antwan', 'Stevie', 'Claudio', 'Blair', 'Keisha', 'Goldie',
+          'Lucy', 'Byron', 'Reyes', 'Zachery', 'Stefan', 'Aron', 'Cecile', 'Brent', 'Adam', 'Emily', 'Allen',
+          'Donald', 'Amanda', 'Kim', 'Jen', 'Jolene', 'Ethan', 'Dennis', 'Taissa', 'Ricardo', 'Alyssa']
+
+      if user_id in names:
+         u_id = 1445
+      
       if user_id == 'Shinjini':
          #full_string = '<br>'.join(["The Fifth Season","Americanah",
                                       #"Poisonwood Bible",
                                       #"Alanna: The First Adventure",
                                       #"Bayou Moon"])
          
-         u_id = 1200
+         u_id = 1500
          ### model output goes here      
       rec = get_n_rec_user(user_df,u_id,model,div_m,test)
       full_string = '<br>'.join(rec)
