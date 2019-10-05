@@ -87,10 +87,7 @@ def get_top_n(predictions, n=5):
     # Creates a matrix with shape (n_users, n_books).
     rat_pred = np.zeros((n_users,n_books))
     
-    # Fills the matrix with the average rating for book weighted by a factor of 0.8 to ensure booksthat are personally matched with users gets returned first.
-    for bid in range(rat_pred.shape[1]):
-        rat_pred[:,bid] = users.loc[users['bid']==bid]['b_average_rating'].iloc[0]*0.8*div_m.iloc[int(bid)][1]
-
+    
     #Fills in actual prediction for given user id, book id combination where the estimate is non-zero.
     for uid, bid, true_r, est, _ in predictions:
         if est > 0.6:
@@ -118,20 +115,22 @@ def id_from_title(df,title=''):
 # In[7]:
 
 
-def titles_from_ids(df,bids=[1]):
+def titles_authors_from_ids(df,bids=[1]):
     
-    """Retrives title of the book from book id from the dataframe.
+    """Retrives title and authors of the book from book id from the dataframe.
     Args: df: Pandas dataframe from which to retrieve the information.
     bids (list): list of book ids for which we need the titles. 
     
-    Returns: titles(list): List of titles from provided book ids.
+    Returns: (list): List of titles and authors from provided book ids.
     """
     titles = []
+    authors = []
     
     for bid in bids:
         titles.append(df.loc[df['bid']==bid]['title'].iloc[0])
+        authors.append(df.loc[df['bid']==bid]['author'].iloc[0])
     
-    return titles
+    return [m + ' by ' +n for m,n in zip(titles,authors)]
 
 
 # In[ ]:
@@ -142,13 +141,19 @@ def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
     """Return the top-N recommendation for an individual user given the model and a testset.
 
     Args:
-        
+
+        df: dataframe containing information about books and users
         user_id(int): user id
-        testset(list) = list of tuples containt (user_id, book_id, <placeholder rating to be predicted>)
+        model: model to use for prediction
+        div_m: dataframe containing information if the books are diverse.
+            has two columns: bid and is_div (0 or 1).
+            used for masking non-diverse recs. 
+        testset(list): list of tuples containing (user_id, book_id, <placeholder rating to be predicted>)
+
         n(int): The number of recommendation to output for each user. Default
             is 5.
 
-    Returns: top_n (array): array of shape (n) with top n predictions for given user id.
+    Returns: rec_n (list): list of length (n) with top n predictions for given user id.
     """
     n_books=9501
     tst = testset.loc[testset['0']==user_id].to_records(index=False).tolist()    
@@ -156,11 +161,15 @@ def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
     
     # Creates a matrix with shape (n_books).
     rat_pred = np.zeros(n_books)
-    
+    # Finds user's favorite genre and the books in that genre.
+    gen_u = df.loc[df.uid==user_id]['fav_genre'].iloc[0]
+    blist = list(int(df.loc[df.genre == gen_u]['bid'].astype(int).unique()))
     # Fills the matrix with the average rating for book weighted by a factor of 0.8 to ensure booksthat are personally matched with users gets returned first.
-    for bid in range(len(rat_pred)):
-        rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*0.8*div_m.iloc[int(bid)][1]
 
+    for bid in range(len(rat_pred)):
+        if bid in blist:
+            rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*0.85*div_m.iloc[int(bid)][1]
+        
     #Fills in actual prediction for given user id, book id combination where the estimate is non-zero.
     for uid, bid, true_r, est, _ in pred:
         if est > 0.6:
@@ -169,7 +178,7 @@ def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
     # Sorts the predictions for each user and retrieve the n highest ones.
     top_n = rat_pred.argsort()[::-1][:n]
     
-    rec_n = titles_from_ids(df,bids=list(top_n))
+    rec_n = titles_authors_from_ids(df,bids=list(top_n))
     
     return rec_n
 
