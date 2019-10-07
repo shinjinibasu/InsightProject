@@ -87,7 +87,10 @@ def get_top_n(predictions, n=5):
     # Creates a matrix with shape (n_users, n_books).
     rat_pred = np.zeros((n_users,n_books))
     
-    
+    # Fills the matrix with the average rating for book weighted by a factor of 0.8 to ensure booksthat are personally matched with users gets returned first.
+    for bid in range(rat_pred.shape[1]):
+        rat_pred[:,bid] = users.loc[users['bid']==bid]['b_average_rating'].iloc[0]*0.8*div_m.iloc[int(bid)][1]
+
     #Fills in actual prediction for given user id, book id combination where the estimate is non-zero.
     for uid, bid, true_r, est, _ in predictions:
         if est > 0.6:
@@ -109,11 +112,10 @@ def id_from_title(df,title=''):
     
     gid = title_to_id[title]
     
-    return user_df.loc[users['goodreads_book_id']==gid].bid.iloc[0]
+    return df.loc[users['goodreads_book_id']==gid].bid.iloc[0]
 
 
 # In[7]:
-
 
 def titles_authors_from_ids(df,bids=[1]):
     
@@ -121,7 +123,7 @@ def titles_authors_from_ids(df,bids=[1]):
     Args: df: Pandas dataframe from which to retrieve the information.
     bids (list): list of book ids for which we need the titles. 
     
-    Returns: (list): List of titles and authors from provided book ids.
+    Returns: (list): List of titles from provided book ids.
     """
     titles = []
     authors = []
@@ -133,7 +135,8 @@ def titles_authors_from_ids(df,bids=[1]):
     return [m + ' by ' +n for m,n in zip(titles,authors)]
 
 
-# In[ ]:
+
+# ln[ ]:
 
 
 def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
@@ -163,13 +166,13 @@ def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
     rat_pred = np.zeros(n_books)
     # Finds user's favorite genre and the books in that genre.
     gen_u = df.loc[df.uid==user_id]['fav_genre'].iloc[0]
-    blist = list(int(df.loc[df.genre == gen_u]['bid'].astype(int).unique()))
-    # Fills the matrix with the average rating for book weighted by a factor of 0.8 to ensure booksthat are personally matched with users gets returned first.
-
+    blist = list(df.loc[df.genre == gen_u]['bid'].astype(int).unique())
+    
+    # Fills the matrix with the average rating for book weighted by a weight factor to ensure booksthat are personally matched with users gets returned first.
     for bid in range(len(rat_pred)):
         if bid in blist:
-            rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*0.85*div_m.iloc[int(bid)][1]
-        
+            rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*div_m.iloc[int(bid)][1]*0.85
+
     #Fills in actual prediction for given user id, book id combination where the estimate is non-zero.
     for uid, bid, true_r, est, _ in pred:
         if est > 0.6:

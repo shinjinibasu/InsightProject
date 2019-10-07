@@ -2,3 +2,6 @@ goodreads2
 .ipynb checkpoints
 *.csv
 __pychache__
+
+rec_lfm_surprise.ipynb
+basic_model.ipynb
