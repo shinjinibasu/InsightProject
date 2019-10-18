@@ -7,7 +7,7 @@
 from flask import Flask
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'book-secret'
+#app.config['SECRET_KEY'] = 'book-secret'
 
 from flaskexample import views
 

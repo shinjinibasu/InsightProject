@@ -46,24 +46,39 @@
           <a class="navbar-brand" href="#">InclusiveReads</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
+                  </div><!--/.nav-collapse -->
       </div>
     </nav>
-
+   <div id="header">
+    <img src="../static/css/pic1.jpg" , width=100%, height = 500 px/>
+    <div id="nav"></div>
+</div>
     <div class="container">
-
       <div class="test form">
-        <h3> You entered the following information</h3>
-      <br> User ID: {{ user_id }} <br>
+        <h1>Welcome! To get book recommendations, please enter your goodreads username or your favored genre.</h1>
+      <form method="POST">
+        Username: <input type="text" name="user_id"><br>
+	or<br>
+	Select Genre: <select name=genre>
+	{% for genre in genres %}
+	<option value= "{{ genre }}" SELECTED>{{ genre }}</option>"
+	{% endfor %}
+	</select>
+        <br><br>
+	<div>
+	<button type="submit" class="btn btn-default btn-lg" style="background-color:green; color:white">Get recommendation!</button>
+       </div>
+      </form>      
+	</div>
+	<div class="test form">
+        <h3> You entered the following information:</h3>
+      <br> Username: {{ user_id }} <br>
       Genre:  {{ genre }} <br><br>
-      <h3>Your top five book recommendations are:</h3><br> {% autoescape false %} {{ full_string }} 
+      <h3>Your book recommendations are:</h3><br> {% autoescape false %} {{ full_string }} 
+	
 {% endautoescape %}<br>	</div>
 	</div>
+	<br><br><br><br>
     </div><!-- /.container -->
 
 
