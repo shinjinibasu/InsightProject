@@ -136,16 +136,14 @@ def titles_authors_from_ids(df,bids=[1]):
 
 
 
-# ln[ ]:
-
-
-def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
+def get_n_rec_user(df,sim, user_id,model,div_m,testset,n=5):
     
     """Return the top-N recommendation for an individual user given the model and a testset.
 
     Args:
 
         df: dataframe containing information about books and users
+        sim: array containing cosine similarity between books based on their top tags
         user_id(int): user id
         model: model to use for prediction
         div_m: dataframe containing information if the books are diverse.
@@ -168,16 +166,30 @@ def get_n_rec_user(df,user_id,model,div_m,testset,n=5):
     gen_u = df.loc[df.uid==user_id]['fav_genre'].iloc[0]
     blist = list(df.loc[df.genre == gen_u]['bid'].astype(int).unique())
     
-    # Fills the matrix with the average rating for book weighted by a weight factor to ensure booksthat are personally matched with users gets returned first.
+    # Fills the matrix with the average rating for book weighted by a weight factor to ensure books that are personally matched with users gets returned first.
     for bid in range(len(rat_pred)):
         if bid in blist:
-            rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*div_m.iloc[int(bid)][1]*0.85
-
-    #Fills in actual prediction for given user id, book id combination where the estimate is non-zero.
+            rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*div_m.iloc[int(bid)][1]*0.8
+    
+    
+    #Fills in prediction from collaborative filtering for given user id, book id combination where the estimate is non-zero.
     for uid, bid, true_r, est, _ in pred:
         if est > 0.6:
             rat_pred[int(bid)] = est*div_m.iloc[int(bid)][1]
 
+    #Fills in the rest with ratings from similar books (weighed down)
+    for bid in range(len(rat_pred)):
+        if (rat_pred[int(bid)] == 0) and (div_m.iloc[int(bid)][1]==1):
+            r = 0
+            length = 0
+            for iid in range(len(rat_pred):
+                if sim[bid][iid] > 0.7:
+                    length += 1
+                    r += df.loc[(df.uid==user_id)&(df.bid==iid)]['rating']*sim[bid][iid]
+            try:
+                rat_pred[int(bid)] = r*0.9/length #fills in the rating value if length is not zero
+            except ZeroDivisionError:
+                rat_pred[int(bid)] = 0 #fills in zero otherwise
     # Sorts the predictions for each user and retrieve the n highest ones.
     top_n = rat_pred.argsort()[::-1][:n]
     
