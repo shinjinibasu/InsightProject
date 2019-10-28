@@ -167,19 +167,16 @@ def get_n_rec_user(df,sim, user_id,model,div_m,testset,n=5):
     blist = list(df.loc[df.genre == gen_u]['bid'].astype(int).unique())
     
     # Fills the matrix with the average rating for book weighted by a weight factor to ensure books that are personally matched with users gets returned first.
-    for bid in range(len(rat_pred)):
-        if bid in blist:
-            rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*div_m.iloc[int(bid)][1]*0.8
+    for bid in blist:
+        rat_pred[bid] = df.loc[df['bid']==bid]['b_average_rating'].iloc[0]*div_m.iloc[int(bid)][1]*0.8
     
     
     #Fills in prediction from collaborative filtering for given user id, book id combination where the estimate is non-zero.
     for uid, bid, true_r, est, _ in pred:
         if est > 0.6:
             rat_pred[int(bid)] = est*div_m.iloc[int(bid)][1]
-
-    #Fills in the rest with ratings from similar books (weighed down)
-    for bid in range(len(rat_pred)):
-        if (rat_pred[int(bid)] == 0) and (div_m.iloc[int(bid)][1]==1):
+        #Fills in the rest with ratings from similar diverse books (weighed down)
+        elif div_m.iloc[int(bid)][1]==1:
             r = 0
             length = 0
             for iid in range(len(rat_pred):
@@ -190,7 +187,8 @@ def get_n_rec_user(df,sim, user_id,model,div_m,testset,n=5):
                 rat_pred[int(bid)] = r*0.9/length #fills in the rating value if length is not zero
             except ZeroDivisionError:
                 rat_pred[int(bid)] = 0 #fills in zero otherwise
-    # Sorts the predictions for each user and retrieve the n highest ones.
+
+                # Sorts the predictions for each user and retrieve the n highest ones.
     top_n = rat_pred.argsort()[::-1][:n]
     
     rec_n = titles_authors_from_ids(df,bids=list(top_n))
